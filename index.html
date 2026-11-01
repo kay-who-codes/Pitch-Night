@@ -113,6 +113,7 @@ details ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px
 .mult{font:900 84px/1 var(--display);text-align:center;background:var(--hi);color:var(--on-hi);border:2px solid var(--line);border-radius:14px;padding:12px;box-shadow:4px 4px 0 var(--shadow)}
 .tip{border:2px dashed var(--line);border-radius:12px;padding:12px;background:var(--soft);display:flex;flex-direction:column;gap:8px}
 .tip.on{border-style:solid;background:var(--hi);color:var(--on-hi)}
+.stamp{font:900 30px/1 var(--display);letter-spacing:.06em;color:var(--bad);border:4px solid var(--bad);border-radius:10px;padding:4px 14px;transform:rotate(-5deg);align-self:flex-start}
 .pop{animation:pop .4s cubic-bezier(.2,1.4,.4,1) both}
 .rise{animation:rise .35s ease both}
 @keyframes pop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
@@ -196,7 +197,7 @@ function startRound(){
   var a=1+(r%(N-1)),b=1+((r+1)%(N-1));
   G.roundStart=G.cash.slice();
   for(var i=0;i<N;i++){
-    G.products.push({id:G.products.length,round:r,drawer:i,namer:(i+a)%N,pitcher:(i+b)%N,img:'',name:'',market:'',ask:0,bids:{},tips:{},mult:rollMult(),total:0,funded:null,deltas:{}});
+    G.products.push({id:G.products.length,round:r,drawer:i,namer:(i+a)%N,pitcher:(i+b)%N,img:'',name:'',market:'',ask:0,bids:{},tips:{},mult:rollMult(),scam:Math.random()<0.05,scamExposed:false,total:0,funded:null,deltas:{}});
   }
   drawNext(r,0);
 }
@@ -213,7 +214,7 @@ function nameNext(r,i){
 function pitchNext(r,i){
   var N=G.players.length;
   if(i<N){var p=G.products[r*N+i];go(pass(p.pitcher,'You are the founder. Set your ask, then pitch to the room.',{type:'ask',pid:p.id}))}
-  else go({type:'roundEnd'});
+  else go({type:'audit',stage:0});
 }
 function bidNext(pid,k){
   var p=G.products[pid],inv=investors(p);
@@ -235,7 +236,7 @@ function resolve(p){
 /* ---------- views ---------- */
 function header(){
   var s=G.screen,t;
-  var pm={draw:'Drawing',name:'Naming',ask:'Setting the ask',pitch:'Pitching',bid:'Bidding',reveal:'Reveal',roundEnd:'Recap'};
+  var pm={draw:'Drawing',name:'Naming',ask:'Setting the ask',pitch:'Pitching',bid:'Bidding',reveal:'Reveal',roundEnd:'Recap',audit:'Audit'};
   if(s.type==='pick')t='Awards';
   else if(s.type==='final')t='Final results';
   else if(s.type==='gallery')t='Gallery';
@@ -267,6 +268,7 @@ function vSetup(){
   '<li>Investors secretly bid up to the ask, or their cash if lower.</li>'+
   '<li>If bids add up to the ask, the pitcher keeps everything raised. If not, the deal collapses and nothing moves.</li>'+
   '<li>Funded products get a hidden market multiplier from ×0 to ×5. Each investor gets their stake back times that number.</li>'+
+  '<li>Every product has a 5% chance of being a scam. Nobody knows, not even the pitcher. The auditors expose scams at the end of each round, and the founder takes all the money invested, funded or not.</li>'+
   '<li>Underdog Hot Tip: players trailing on net worth can unlock one tip per round that says whether the multiplier is above or below ×1.</li>'+
   '</ul></details>'+
   '<button class="btn primary" data-act="start">Start game</button>';
@@ -372,6 +374,34 @@ function vReveal(s){
   h+='<button class="btn primary" data-act="revNext">'+(last?'Round recap':'Next product')+'</button></div>';
   return h;
 }
+function exposeScams(){
+  G.products.forEach(function(p){
+    if(p.round!==G.round||!p.scam||p.scamExposed)return;
+    p.scamExposed=true;
+    investors(p).forEach(function(j){
+      var b=p.bids[j]||0,d=p.deltas[j]||0;
+      G.cash[j]+=-d-b;p.deltas[j]=-b;
+    });
+    if(!p.funded)G.cash[p.pitcher]+=p.total;
+  });
+}
+function vAudit(s){
+  if(s.stage===0){
+    return '<div class="card pass"><div class="stripe"></div><div class="in"><span class="lbl">End of round</span><div class="pname">The auditors are in</div><p class="muted">Every deal from this round is about to be checked.</p><button class="btn primary" data-act="auditNext">Open the books</button></div><div class="stripe"></div></div>';
+  }
+  var scams=G.products.filter(function(p){return p.round===G.round&&p.scam});
+  if(!scams.length){
+    return '<div class="card center"><h2>All clean</h2><p class="muted">Every deal this round was legitimate. Nobody got robbed.</p><button class="btn primary" data-act="auditNext">Round recap</button></div>';
+  }
+  var cards=scams.map(function(p){
+    var vic=investors(p).filter(function(j){return (p.bids[j]||0)>0}).map(function(j){
+      return '<div class="row"><span class="nm">'+pn(j)+'</span><span class="mono bad"><b>'+signed(-(p.bids[j]||0))+'</b></span></div>';
+    }).join('');
+    return '<div class="card pop"><span class="stamp">SCAM</span><div class="pitem"><img class="pimg sm" src="'+p.img+'" alt="Drawing of '+esc(p.name)+'"><div class="stack" style="gap:4px;min-width:0"><b style="font:900 20px/1.15 var(--display);overflow-wrap:anywhere">'+esc(p.name)+'</b><span class="muted">Founder: '+pn(p.pitcher)+'</span></div></div>'+
+    (p.total>0?'<p><b>'+pn(p.pitcher)+' kept every dollar invested: <span class="mono good">'+signed(p.total)+'</span></b>, whatever the ask or the market said. Even the founder did not know.</p><div>'+vic+'</div>':'<p>Nobody got burned.</p>')+'</div>';
+  }).join('');
+  return '<div class="card"><h2>Scam exposed</h2><p class="muted">'+scams.length+(scams.length>1?' products were':' product was')+' a scam this round.</p></div>'+cards+'<button class="btn primary" data-act="auditNext">Round recap</button>';
+}
 function vRoundEnd(){
   var order=G.players.map(function(_,i){return i}).sort(function(a,b){return G.cash[b]-G.cash[a]});
   var rows=order.map(function(i,k){
@@ -395,7 +425,7 @@ function stats(){
   var N=G.players.length,profit=[],raised=[],worst=null,i;
   for(i=0;i<N;i++){profit.push(0);raised.push(0)}
   G.products.forEach(function(p){
-    if(!p.funded)return;
+    if(!(p.funded||p.scam))return;
     raised[p.pitcher]+=p.total;
     Object.keys(p.deltas).forEach(function(k){
       var j=+k,d=p.deltas[k];
@@ -426,7 +456,7 @@ function vFinal(){
 }
 function vGallery(){
   var cards=G.products.map(function(p){
-    var badge=p.funded?'<span class="badge ok">Raised '+money(p.total)+' · ×'+p.mult+'</span>':'<span class="badge no">Deal collapsed</span>';
+    var badge=p.scam?'<span class="badge no">SCAM · took '+money(p.total)+'</span>':p.funded?'<span class="badge ok">Raised '+money(p.total)+' · ×'+p.mult+'</span>':'<span class="badge no">Deal collapsed</span>';
     return '<div class="card" style="padding:10px;gap:8px;box-shadow:3px 3px 0 var(--shadow)"><img class="pimg" src="'+p.img+'" alt="Drawing of '+esc(p.name)+'"><b style="font:900 17px/1.15 var(--display);overflow-wrap:anywhere">'+esc(p.name)+'</b><span class="tag" style="font-size:12px">'+esc(p.market)+'</span><small class="muted" style="overflow-wrap:anywhere">Drawn by '+pn(p.drawer)+'<br>Named by '+pn(p.namer)+'<br>Pitched by '+pn(p.pitcher)+'</small><div>'+badge+'</div></div>';
   }).join('');
   return '<div class="card"><h2>The gallery</h2><p class="muted">Every product from tonight. Screenshot your favorites.</p></div><div class="two" style="align-items:start">'+cards+'</div>'+
@@ -447,6 +477,7 @@ function render(){
     case 'pitch':body=vPitch(s);break;
     case 'bid':body=vBid(s);break;
     case 'reveal':body=vReveal(s);break;
+    case 'audit':body=vAudit(s);break;
     case 'roundEnd':body=vRoundEnd();break;
     case 'pick':body=vPick(s);break;
     case 'final':body=vFinal();break;
@@ -589,6 +620,8 @@ document.addEventListener('click',function(e){
       else if(s.stage===1&&p.funded){s.stage=2;save();render()}
       else pitchNext(p.round,p.id-p.round*N+1);
       break;
+    case 'auditNext':
+      if(s.stage===0){exposeScams();s.stage=1;save();render()}else go({type:'roundEnd'});break;
     case 'roundNext':
       if(G.round<G.rounds-1){G.round++;startRound()}else go({type:'pick',i:0});break;
     case 'pickSel':G.picks[PICKS[s.i].k]=i;save();render();break;
