@@ -1,0 +1,608 @@
+<title>Pitch Night</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one phone-width column on graph paper. Every screen is a sticker-style card with a hard offset shadow; yellow marks the one thing to tap or look at. */
+:root{
+  --bg:#EAF0F7;--grid:#D6E0EC;--card:#FFFFFF;--soft:#F1F5FA;
+  --ink:#12203A;--muted:#52627C;--line:#12203A;--shadow:#12203A;
+  --hi:#FFD43B;--on-hi:#12203A;
+  --good:#0E8A53;--bad:#CF2F3C;--focus:#2457E6;
+  --display:ui-rounded,"SF Pro Rounded","Arial Rounded MT Bold","Nunito","Trebuchet MS",system-ui,sans-serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1524;--grid:#17213A;--card:#182238;--soft:#1F2B47;
+  --ink:#E9EFFA;--muted:#9AABC7;--line:#4C6190;--shadow:#050914;
+  --good:#3DD68C;--bad:#FF7480;--focus:#8FB0FF;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1524;--grid:#17213A;--card:#182238;--soft:#1F2B47;
+  --ink:#E9EFFA;--muted:#9AABC7;--line:#4C6190;--shadow:#050914;
+  --good:#3DD68C;--bad:#FF7480;--focus:#8FB0FF;color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;background-color:var(--bg);color:var(--ink);font:16px/1.4 var(--body);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;
+  padding-block:10px 32px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  -webkit-tap-highlight-color:transparent}
+#app{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1,h2,h3,p{margin:0}
+h2{font:900 26px/1.1 var(--display);text-wrap:balance}
+h3{font:800 18px/1.2 var(--display)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.center{text-align:center}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px}
+.crumb{display:flex;flex-direction:column;min-width:0}
+.crumb b{font:900 17px/1.1 var(--display)}
+.crumb span{font:600 12px/1.3 var(--mono);color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+
+.card{background:var(--card);border:2px solid var(--line);border-radius:14px;box-shadow:4px 4px 0 var(--shadow);padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.btn{min-height:60px;width:100%;border:2px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);
+  font:800 18px/1.1 var(--display);box-shadow:3px 3px 0 var(--shadow);cursor:pointer;padding:10px 16px;touch-action:manipulation}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--shadow)}
+.btn.primary{background:var(--hi);color:var(--on-hi)}
+.btn:disabled{opacity:.45;box-shadow:none;cursor:not-allowed}
+.btn.sm{min-height:48px;font-size:16px}
+.chip{min-height:48px;padding:0 16px;border:2px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font:800 14px var(--display);cursor:pointer;touch-action:manipulation}
+.chip.on{background:var(--hi);color:var(--on-hi)}
+.seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.seg .chip{border-radius:12px;min-height:52px;font-size:16px}
+.inp{width:100%;min-height:56px;border:2px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink);font:600 18px var(--body);padding:0 14px}
+.lbl{font:700 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:6px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:2px dashed var(--grid)}
+.row:last-child{border-bottom:0}
+.row .nm{font-weight:700;min-width:0;overflow-wrap:anywhere}
+.good{color:var(--good)}.bad{color:var(--bad)}
+.stack{display:flex;flex-direction:column;gap:10px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+
+/* setup */
+.word{font:900 clamp(44px,15vw,68px)/1 var(--display);letter-spacing:-.02em}
+.mk{display:inline-block;background:var(--hi);color:var(--on-hi);border:2px solid var(--line);border-radius:12px;padding:0 .18em;transform:rotate(-2.5deg);box-shadow:3px 3px 0 var(--shadow)}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.steps div{background:var(--soft);border:2px solid var(--line);border-radius:12px;padding:10px 8px;font:800 14px/1.2 var(--display);text-align:center}
+.steps small{display:block;font:500 12px/1.3 var(--body);color:var(--muted);margin-top:4px}
+.prow{display:flex;align-items:center;gap:8px}
+.pn{flex:none;width:32px;height:32px;border-radius:50%;background:var(--hi);color:var(--on-hi);border:2px solid var(--line);display:grid;place-items:center;font:800 14px var(--mono)}
+.x{flex:none;width:48px;height:48px;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:800 22px var(--display);cursor:pointer}
+.stepper{display:grid;grid-template-columns:64px 1fr 64px;gap:10px;align-items:center}
+.stepper .btn{min-height:56px;font-size:26px;padding:0}
+.stepper output{font:900 34px var(--display);text-align:center}
+details summary{font:800 16px var(--display);cursor:pointer;min-height:44px;display:flex;align-items:center}
+details ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:var(--muted)}
+
+/* pass screen */
+.pass{padding:0;overflow:hidden;gap:0}
+.stripe{height:22px;background:repeating-linear-gradient(-45deg,#FFD43B 0 16px,#12203A 16px 32px)}
+.pass .in{padding:34px 20px 26px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
+.pname{font:900 clamp(40px,14vw,64px)/1.05 var(--display);overflow-wrap:anywhere;
+  text-decoration:underline;text-decoration-color:var(--hi);text-decoration-thickness:.12em;text-underline-offset:.1em}
+
+/* drawing */
+.cwrap{width:100%;aspect-ratio:1;max-width:100%;border:2px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.cwrap canvas{width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sw{width:44px;height:44px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0}
+.sw.on{outline:4px solid var(--hi);outline-offset:1px;box-shadow:0 0 0 2px var(--line)}
+.chip.sz{min-width:64px}
+
+/* product visuals */
+.pimg{display:block;width:100%;aspect-ratio:1;object-fit:cover;background:#fff;border:2px solid var(--line);border-radius:12px}
+.pimg.sm{width:96px;flex:none}
+.pitem{display:flex;gap:12px;align-items:center}
+.pname2{font:900 26px/1.1 var(--display);overflow-wrap:anywhere;text-wrap:balance}
+.tag{display:inline-block;background:var(--soft);border:2px solid var(--line);border-radius:999px;padding:4px 12px;font:700 13px var(--mono);overflow-wrap:anywhere}
+.big{font:900 40px/1 var(--mono);font-variant-numeric:tabular-nums}
+.timer{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--soft);border:2px solid var(--line);border-radius:12px;padding:10px 14px}
+.timer .t{font:900 44px/1 var(--mono);font-variant-numeric:tabular-nums}
+.timer.up .t{color:var(--bad)}
+.timer .btn{width:auto;min-width:140px}
+.bar{height:24px;border:2px solid var(--line);border-radius:999px;background:var(--soft);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--hi);transition:width .8s ease}
+.bar.ok i{background:var(--good)}
+.verdict{font:900 28px/1 var(--display);text-align:center;padding:10px;border:2px solid var(--line);border-radius:12px;background:var(--soft)}
+.verdict.ok{color:var(--good)}.verdict.no{color:var(--bad)}
+.mult{font:900 84px/1 var(--display);text-align:center;background:var(--hi);color:var(--on-hi);border:2px solid var(--line);border-radius:14px;padding:12px;box-shadow:4px 4px 0 var(--shadow)}
+.tip{border:2px dashed var(--line);border-radius:12px;padding:12px;background:var(--soft);display:flex;flex-direction:column;gap:8px}
+.tip.on{border-style:solid;background:var(--hi);color:var(--on-hi)}
+.pop{animation:pop .4s cubic-bezier(.2,1.4,.4,1) both}
+.rise{animation:rise .35s ease both}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+@keyframes rise{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+
+/* picks, awards, gallery */
+.pc{display:flex;flex-direction:column;gap:6px;align-items:stretch;text-align:left;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:8px;cursor:pointer;min-width:0;font:inherit}
+.pc b{font:800 15px/1.2 var(--display);overflow-wrap:anywhere}
+.pc small{color:var(--muted);overflow-wrap:anywhere}
+.pc.sel{outline:5px solid var(--hi);outline-offset:1px;box-shadow:0 0 0 2px var(--line)}
+.dock{position:sticky;bottom:8px;z-index:2}
+.aw{display:flex;gap:12px;align-items:center;border:2px solid var(--line);border-radius:12px;padding:10px;background:var(--soft)}
+.aw .pimg{width:72px;flex:none}
+.aw .t{font:700 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.aw .w{font:900 20px/1.15 var(--display);overflow-wrap:anywhere}
+.aw .s{color:var(--muted);font-size:14px;overflow-wrap:anywhere}
+.crown{font:900 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;background:var(--hi);color:var(--on-hi);border:2px solid var(--line);border-radius:999px;padding:4px 12px;align-self:center}
+.badge{display:inline-block;font:800 12px var(--mono);border:2px solid var(--line);border-radius:999px;padding:3px 10px;background:var(--soft)}
+.badge.ok{color:var(--good)}.badge.no{color:var(--bad)}
+
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(5,9,20,.7);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.sheet .card{width:100%;max-width:520px;margin-top:8px}
+
+@media (prefers-reduced-motion:reduce){.pop,.rise{animation:none}.bar i{transition:none}.btn:active{transform:none}}
+</style>
+
+<div id="app"></div>
+
+<script>
+'use strict';
+var START=1000000,MIN_P=3,MAX_P=8,ASK_MIN=50000,ASK_MAX=500000,ASK_STEP=50000;
+var MULT_TABLE=[[0,25],[0.5,20],[1.5,20],[2,17],[3,12],[5,6]];
+var MULT_LABEL={0:'Total flop',0.5:'Weak seller',1.5:'Solid hit',2:'Crowd pleaser',3:'Breakout success',5:'Unicorn'};
+var PALETTE=[['#111111','Black'],['#E5383B','Red'],['#F28C28','Orange'],['#2E9E5B','Green'],['#2563EB','Blue'],['#8B3FD9','Purple'],['#7A4B2A','Brown']];
+var SIZES=[[6,'Fine'],[14,'Medium'],[30,'Bold']];
+var PICKS=[
+  {k:'drawing',t:'Best Drawing',d:'Which drawing deserves a frame?'},
+  {k:'name',t:'Best Name',d:'Which product name is the cleverest?'},
+  {k:'pitch',t:'Best Pitch',d:'Who sold their product best?'}
+];
+var KEY='pitchnight-save-v1';
+
+var S={names:['','',''],rounds:3,timer:0};
+var G=null,SAVED=readSave(),showStand=false,confirmQuit=false;
+var strokes=[],cur=null,backup=null,tool={color:0,size:1,erase:false},cvRedraw=null;
+var bidAmt=0,bidKey='',tInt=null,tLeft=0,AC=null;
+
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function money(n){return (n<0?'-':'')+'$'+Math.abs(Math.round(n)).toLocaleString('en-US')}
+function signed(n){return (n>0?'+':n<0?'−':'')+'$'+Math.abs(Math.round(n)).toLocaleString('en-US')}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function readSave(){try{var s=localStorage.getItem(KEY);return s?JSON.parse(s):null}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(G))}catch(e){}}
+function clearSave(){try{localStorage.removeItem(KEY)}catch(e){}}
+function rollMult(){var r=Math.random()*100,a=0;for(var i=0;i<MULT_TABLE.length;i++){a+=MULT_TABLE[i][1];if(r<a)return MULT_TABLE[i][0]}return 1.5}
+function pn(i){return esc(G.players[i])}
+function investors(p){var N=G.players.length,out=[];for(var k=1;k<N;k++)out.push((p.pitcher+k)%N);return out}
+function bstep(p){return Math.max(1,Math.round(p.ask/10))}
+function isUnderdog(j){
+  var c=G.cash,mx=Math.max.apply(null,c),mn=Math.min.apply(null,c);
+  if(mx===mn)return false;
+  var k=Math.ceil(c.length/3),sorted=c.slice().sort(function(a,b){return a-b});
+  return c[j]<=sorted[k-1]&&c[j]<mx;
+}
+
+/* ---------- game flow ---------- */
+function pass(who,desc,next){return {type:'pass',who:who,desc:desc,next:next}}
+function go(screen){
+  stopTimer();G.screen=screen;showStand=false;confirmQuit=false;save();render();window.scrollTo(0,0);
+}
+function newGame(){
+  var players=S.names.map(function(x,i){return x.trim()||('Player '+(i+1))});
+  G={players:players,cash:players.map(function(){return START}),rounds:S.rounds,timer:S.timer,round:0,products:[],tipUsed:{},picks:{},screen:null,roundStart:[]};
+  SAVED=null;
+  startRound();
+}
+function startRound(){
+  var N=G.players.length,r=G.round;
+  var a=1+(r%(N-1)),b=1+((r+1)%(N-1));
+  G.roundStart=G.cash.slice();
+  for(var i=0;i<N;i++){
+    G.products.push({id:G.products.length,round:r,drawer:i,namer:(i+a)%N,pitcher:(i+b)%N,img:'',name:'',market:'',ask:0,bids:{},tips:{},mult:rollMult(),total:0,funded:null,deltas:{}});
+  }
+  drawNext(r,0);
+}
+function drawNext(r,i){
+  var N=G.players.length;
+  if(i<N)go(pass(i,'You will draw a product. Keep the screen to yourself.',{type:'draw',pid:r*N+i}));
+  else nameNext(r,0);
+}
+function nameNext(r,i){
+  var N=G.players.length;
+  if(i<N){var p=G.products[r*N+i];go(pass(p.namer,'You will name a product someone drew and pick its target market.',{type:'name',pid:p.id}))}
+  else pitchNext(r,0);
+}
+function pitchNext(r,i){
+  var N=G.players.length;
+  if(i<N){var p=G.products[r*N+i];go(pass(p.pitcher,'You are the founder. Set your ask, then pitch to the room.',{type:'ask',pid:p.id}))}
+  else go({type:'roundEnd'});
+}
+function bidNext(pid,k){
+  var p=G.products[pid],inv=investors(p);
+  if(k<inv.length)go(pass(inv[k],'Place your secret bid on "'+p.name+'". Hide the screen from the others.',{type:'bid',pid:pid,k:k}));
+  else{resolve(p);go(pass(null,'All bids are in. Gather round to see what happens.',{type:'reveal',pid:pid,stage:0}))}
+}
+function resolve(p){
+  if(p.funded!==null)return;
+  var inv=investors(p);
+  p.total=inv.reduce(function(a,j){return a+(p.bids[j]||0)},0);
+  p.funded=p.total>=p.ask;
+  inv.forEach(function(j){
+    var b=p.bids[j]||0;
+    if(p.funded){var d=Math.round(b*p.mult)-b;p.deltas[j]=d;G.cash[j]+=d}else p.deltas[j]=0;
+  });
+  if(p.funded)G.cash[p.pitcher]+=p.total;
+}
+
+/* ---------- views ---------- */
+function header(){
+  var s=G.screen,t;
+  var pm={draw:'Drawing',name:'Naming',ask:'Setting the ask',pitch:'Pitching',bid:'Bidding',reveal:'Reveal',roundEnd:'Recap'};
+  if(s.type==='pick')t='Awards';
+  else if(s.type==='final')t='Final results';
+  else if(s.type==='gallery')t='Gallery';
+  else{var ty=s.type==='pass'?s.next.type:s.type;t='Round '+(G.round+1)+' of '+G.rounds+' · '+(pm[ty]||'')}
+  return '<div class="top"><div class="crumb"><b>Pitch Night</b><span>'+t+'</span></div><button class="chip" data-act="stand">Standings</button></div>';
+}
+function vStand(){
+  var order=G.players.map(function(_,i){return i}).sort(function(a,b){return G.cash[b]-G.cash[a]});
+  var rows=order.map(function(i,k){return '<div class="row"><span class="nm">'+(k+1)+'. '+pn(i)+'</span><span class="mono"><b>'+money(G.cash[i])+'</b></span></div>'}).join('');
+  return '<div class="sheet"><div class="card"><h2>Net worth</h2><div>'+rows+'</div><button class="btn primary" data-act="stand">Back to game</button><button class="btn sm" data-act="quit">'+(confirmQuit?'Tap again to quit. Progress is lost.':'Quit to menu')+'</button></div></div>';
+}
+function vSetup(){
+  var n=S.names.length;
+  var rows=S.names.map(function(v,i){
+    return '<div class="prow"><span class="pn">'+(i+1)+'</span><input class="inp" id="pn'+i+'" data-i="'+i+'" value="'+esc(v)+'" maxlength="16" placeholder="Player '+(i+1)+'" autocomplete="off" autocapitalize="words" aria-label="Player '+(i+1)+' name">'+(n>MIN_P?'<button class="x" data-act="delP" data-i="'+i+'" aria-label="Remove player '+(i+1)+'">×</button>':'')+'</div>';
+  }).join('');
+  var timers=[0,30,60,90].map(function(v){return '<button class="chip'+(S.timer===v?' on':'')+'" data-act="timer" data-v="'+v+'">'+(v?v+'s':'Off')+'</button>'}).join('');
+  var resume=SAVED?'<div class="card"><h3>Game in progress</h3><p class="muted">'+SAVED.players.length+' players, round '+(SAVED.round+1)+' of '+SAVED.rounds+'.</p><button class="btn primary" data-act="resume">Resume game</button><button class="btn sm" data-act="discard">Discard it</button></div>':'';
+  return '<div class="top"><div class="crumb"><span>Party game for 3 to 8 players</span></div></div>'+
+  '<div class="stack" style="gap:14px"><h1 class="word"><span class="mk">Pitch</span> Night</h1><p class="muted">One phone, one room. Draw a product, name it, pitch it, bet on it.</p></div>'+
+  '<div class="steps"><div>Draw it<small>Player 1 sketches</small></div><div>Name it<small>Player 2 titles it and picks the market</small></div><div>Pitch it<small>Player 3 sells, the rest bid</small></div></div>'+
+  resume+
+  '<div class="card"><h3>Players</h3><div class="stack">'+rows+'</div>'+(n<MAX_P?'<button class="btn sm" data-act="addP">Add player</button>':'')+'</div>'+
+  '<div class="card"><h3>Rounds</h3><div class="stepper"><button class="btn" data-act="rounds" data-d="-1" aria-label="Fewer rounds">−</button><output>'+S.rounds+'</output><button class="btn" data-act="rounds" data-d="1" aria-label="More rounds">+</button></div><p class="muted">'+(n*S.rounds)+' products in total. Everyone draws, names and pitches once per round.</p></div>'+
+  '<div class="card"><h3>Pitch timer</h3><div class="seg">'+timers+'</div></div>'+
+  '<details class="card"><summary>How the money works</summary><ul>'+
+  '<li>Everyone starts with '+money(START)+'.</li>'+
+  '<li>The pitcher sets an ask. A low ask is easy to fund. A high ask pays more.</li>'+
+  '<li>Investors secretly bid up to the ask, or their cash if lower.</li>'+
+  '<li>If bids add up to the ask, the pitcher keeps everything raised. If not, the deal collapses and nothing moves.</li>'+
+  '<li>Funded products get a hidden market multiplier from ×0 to ×5. Each investor gets their stake back times that number.</li>'+
+  '<li>Underdog Hot Tip: players trailing on net worth can unlock one tip per round that says whether the multiplier is above or below ×1.</li>'+
+  '</ul></details>'+
+  '<button class="btn primary" data-act="start">Start game</button>';
+}
+function vPass(s){
+  var big=s.who===null?'Everybody':pn(s.who);
+  var btn=s.who===null?'Show me':'I’m '+pn(s.who)+'. Go.';
+  return '<div class="card pass"><div class="stripe"></div><div class="in"><span class="lbl">Pass the phone to</span><div class="pname">'+big+'</div><p class="muted">'+esc(s.desc)+'</p><button class="btn primary" data-act="passGo">'+btn+'</button></div><div class="stripe"></div></div>';
+}
+function vDraw(s){
+  var sw=PALETTE.map(function(c,i){return '<button class="sw" data-act="color" data-i="'+i+'" style="background:'+c[0]+'" aria-label="'+c[1]+'"></button>'}).join('');
+  var sz=SIZES.map(function(z,i){return '<button class="chip sz" data-act="size" data-i="'+i+'">'+z[1]+'</button>'}).join('');
+  return '<div class="card"><div><h2>Draw a product</h2><p class="muted">Invent anything. Someone else will name it, so make it clear.</p></div>'+
+  '<div class="cwrap"><canvas id="cv" width="800" height="800" aria-label="Drawing canvas"></canvas></div>'+
+  '<div class="tools" id="tools">'+sw+'</div>'+
+  '<div class="tools" id="sizes">'+sz+'<button class="chip" data-act="eraser" id="erb">Eraser</button></div>'+
+  '<div class="two"><button class="btn sm" data-act="undo">Undo</button><button class="btn sm" data-act="clear">Clear</button></div>'+
+  '<button class="btn primary" id="doneBtn" data-act="drawDone" disabled>Done drawing</button></div>';
+}
+function vName(s){
+  var p=G.products[s.pid];
+  return '<div class="card"><h2>Name this product</h2><img class="pimg" src="'+p.img+'" alt="A drawn product waiting for a name">'+
+  '<div class="field"><label class="lbl" for="pname">Product name</label><input class="inp" id="pname" maxlength="40" placeholder="The Snoozinator 3000" autocomplete="off"></div>'+
+  '<div class="field"><label class="lbl" for="pmarket">Target market the pitcher must sell to</label><input class="inp" id="pmarket" maxlength="50" placeholder="Nervous first-time dog owners" autocomplete="off"></div>'+
+  '<button class="btn primary" id="nameDone" data-act="nameDone" disabled>Lock it in</button></div>';
+}
+function vAsk(s){
+  var p=G.products[s.pid];
+  return '<div class="card"><div><span class="lbl">Your product</span><div class="pname2">'+esc(p.name)+'</div></div>'+
+  '<img class="pimg" src="'+p.img+'" alt="Drawing of '+esc(p.name)+'">'+
+  '<div><span class="lbl">You must pitch it to</span><div><span class="tag">'+esc(p.market)+'</span></div></div></div>'+
+  '<div class="card"><h3>How much are you asking for?</h3>'+
+  '<div class="big center" id="askv">'+money(200000)+'</div>'+
+  '<div class="stepper" style="grid-template-columns:64px 1fr 64px"><button class="btn" data-act="askStep" data-d="-1" aria-label="Lower ask">−</button><input type="range" id="askr" min="'+ASK_MIN+'" max="'+ASK_MAX+'" step="'+ASK_STEP+'" value="200000" aria-label="Ask amount"><button class="btn" data-act="askStep" data-d="1" aria-label="Raise ask">+</button></div>'+
+  '<p class="muted">Funded means you keep every dollar raised. If investors fall short, you get nothing.</p>'+
+  '<button class="btn primary" data-act="askDone">Start the pitch</button></div>';
+}
+function fmtT(t){return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')}
+function vPitch(s){
+  var p=G.products[s.pid];
+  var inv=investors(p).map(pn).join(', ');
+  var timer=G.timer>0?'<div class="timer" id="timer"><span class="t" id="tleft">'+fmtT(G.timer)+'</span><button class="btn sm" id="tbtn" data-act="tStart">Start timer</button></div>':'';
+  return '<div class="card"><span class="lbl">'+pn(p.pitcher)+' is pitching</span>'+
+  '<img class="pimg" src="'+p.img+'" alt="Drawing of '+esc(p.name)+'">'+
+  '<div class="pname2">'+esc(p.name)+'</div>'+
+  '<div class="stack"><div><span class="lbl">Selling to</span><div><span class="tag">'+esc(p.market)+'</span></div></div>'+
+  '<div><span class="lbl">Asking</span><div class="big">'+money(p.ask)+'</div></div></div>'+
+  timer+
+  '<p class="muted">Investors: '+inv+'</p>'+
+  '<button class="btn primary" data-act="pitchDone">Pitch over. Time to bid.</button></div>';
+}
+function vBid(s){
+  var p=G.products[s.pid],who=investors(p)[s.k],max=Math.min(G.cash[who],p.ask);
+  if(bidAmt>max)bidAmt=max;
+  var tip='';
+  var used=G.tipUsed[G.round+':'+who];
+  if(p.tips[who]){
+    var up=p.tips[who]==='ABOVE';
+    tip='<div class="tip on pop"><span class="lbl" style="color:inherit">Underdog Hot Tip</span><b style="font:900 20px/1.2 var(--display)">The market lands '+p.tips[who]+' ×1. '+(up?'Investors profit.':'Investors lose money.')+'</b></div>';
+  }else if(isUnderdog(who)&&used===undefined){
+    tip='<div class="tip"><span class="lbl">Underdog Hot Tip</span><span>You are trailing. Reveal one tip this round: is the multiplier above or below ×1?</span><button class="btn sm" data-act="tip">Reveal Hot Tip</button></div>';
+  }
+  return '<div class="card"><span class="lbl">'+pn(who)+', your secret bid</span>'+
+  '<div class="pitem"><img class="pimg sm" src="'+p.img+'" alt="Drawing of '+esc(p.name)+'"><div class="stack" style="gap:4px;min-width:0"><b style="font:800 18px/1.2 var(--display);overflow-wrap:anywhere">'+esc(p.name)+'</b><span class="muted" style="overflow-wrap:anywhere">'+esc(p.market)+'</span><span class="mono">Ask '+money(p.ask)+'</span></div></div>'+
+  '<div class="row" style="padding:0;border:0"><span class="lbl">Your cash</span><span class="mono"><b>'+money(G.cash[who])+'</b></span></div>'+
+  '<div class="big center" id="bidv">'+money(bidAmt)+'</div>'+
+  (max>0?'<div class="two"><button class="btn" data-act="bidStep" data-d="-1">− '+money(bstep(p))+'</button><button class="btn" data-act="bidStep" data-d="1">+ '+money(bstep(p))+'</button></div>'+
+  '<div class="three"><button class="chip" data-act="bidSet" data-v="0">None</button><button class="chip" data-act="bidSet" data-v="half">Half</button><button class="chip" data-act="bidSet" data-v="max">Max</button></div>'
+  :'<p class="muted">You are out of cash, so you can only watch this one.</p>')+
+  tip+
+  '<button class="btn primary" data-act="bidLock">Lock in bid</button></div>';
+}
+var MLAB=MULT_LABEL;
+function vReveal(s){
+  var p=G.products[s.pid],inv=investors(p),N=G.players.length;
+  var last=(p.id-p.round*N)===N-1;
+  var h='<div class="card"><div class="pitem"><img class="pimg sm" src="'+p.img+'" alt="Drawing of '+esc(p.name)+'"><div class="stack" style="gap:4px;min-width:0"><b style="font:900 20px/1.15 var(--display);overflow-wrap:anywhere">'+esc(p.name)+'</b><span class="muted">Pitched by '+pn(p.pitcher)+'</span><span class="mono">Ask '+money(p.ask)+'</span></div></div>';
+  if(s.stage===0){
+    h+='<p class="center muted">'+inv.length+' investors have bid in secret.</p><button class="btn primary" data-act="revNext">Reveal the bids</button></div>';
+    return h;
+  }
+  h+='<div class="stack">'+inv.map(function(j,k){
+    var b=p.bids[j]||0;
+    return '<div class="row rise" style="animation-delay:'+(k*0.15)+'s"><span class="nm">'+pn(j)+'</span><span class="mono"><b>'+(b?money(b):'Passed')+'</b></span></div>';
+  }).join('')+'</div>';
+  var pct=Math.min(100,Math.round(p.total/p.ask*100));
+  h+='<div><div class="row" style="padding:0 0 6px;border:0"><span class="lbl">Raised</span><span class="mono"><b>'+money(p.total)+'</b> of '+money(p.ask)+'</span></div><div class="bar'+(p.funded?' ok':'')+'"><i style="width:'+pct+'%"></i></div></div>';
+  h+='<div class="verdict pop '+(p.funded?'ok':'no')+'">'+(p.funded?'Funded':'Deal collapsed')+'</div>';
+  if(s.stage===1){
+    if(p.funded){
+      h+='<p class="center muted">The market has not spoken yet.</p><button class="btn primary" data-act="revNext">Reveal the market</button>';
+    }else{
+      h+='<p class="center muted">No money moves. The market would have said ×'+p.mult+'.</p><button class="btn primary" data-act="revNext">'+(last?'Round recap':'Next product')+'</button>';
+    }
+    return h+'</div>';
+  }
+  h+='<div class="mult pop">×'+p.mult+'</div><p class="center"><b>'+(MLAB[p.mult]||'')+'</b></p><div>';
+  inv.forEach(function(j){
+    var b=p.bids[j]||0,d=p.deltas[j]||0;
+    h+='<div class="row"><span class="nm">'+pn(j)+'<br><small class="muted mono">'+(b?money(b)+' → '+money(Math.round(b*p.mult)):'Kept their cash')+'</small></span><span class="mono '+(d>0?'good':d<0?'bad':'')+'"><b>'+(b?signed(d):'$0')+'</b></span></div>';
+  });
+  h+='<div class="row"><span class="nm">'+pn(p.pitcher)+'<br><small class="muted">Founder keeps the raise</small></span><span class="mono good"><b>'+signed(p.total)+'</b></span></div></div>';
+  h+='<button class="btn primary" data-act="revNext">'+(last?'Round recap':'Next product')+'</button></div>';
+  return h;
+}
+function vRoundEnd(){
+  var order=G.players.map(function(_,i){return i}).sort(function(a,b){return G.cash[b]-G.cash[a]});
+  var rows=order.map(function(i,k){
+    var d=G.cash[i]-G.roundStart[i];
+    return '<div class="row"><span class="nm">'+(k+1)+'. '+pn(i)+'</span><span class="mono" style="text-align:right"><b>'+money(G.cash[i])+'</b><br><small class="'+(d>0?'good':d<0?'bad':'muted')+'">'+(d?signed(d):'no change')+' this round</small></span></div>';
+  }).join('');
+  var more=G.round<G.rounds-1;
+  return '<div class="card"><h2>Round '+(G.round+1)+' recap</h2><div>'+rows+'</div><button class="btn primary" data-act="roundNext">'+(more?'Start round '+(G.round+2):'On to the awards')+'</button></div>';
+}
+function vPick(s){
+  var c=PICKS[s.i],sel=G.picks[c.k];
+  var cards=G.products.map(function(p){
+    var by=c.k==='drawing'?'Drawn by '+pn(p.drawer):c.k==='name'?'Named by '+pn(p.namer):'Pitched by '+pn(p.pitcher);
+    return '<button class="pc'+(sel===p.id?' sel':'')+'" data-act="pickSel" data-i="'+p.id+'"><img class="pimg" src="'+p.img+'" alt=""><b>'+esc(p.name)+'</b><small>'+by+'</small></button>';
+  }).join('');
+  return '<div class="card"><span class="lbl">Award '+(s.i+1)+' of '+PICKS.length+'</span><h2>'+c.t+'</h2><p class="muted">'+c.d+' Talk it over as a group, then one person taps the winner.</p></div>'+
+  '<div class="two">'+cards+'</div>'+
+  '<div class="dock"><button class="btn primary" data-act="pickLock"'+(sel===undefined?' disabled':'')+'>'+(s.i<PICKS.length-1?'Lock winner':'See final results')+'</button></div>';
+}
+function stats(){
+  var N=G.players.length,profit=[],raised=[],worst=null,i;
+  for(i=0;i<N;i++){profit.push(0);raised.push(0)}
+  G.products.forEach(function(p){
+    if(!p.funded)return;
+    raised[p.pitcher]+=p.total;
+    Object.keys(p.deltas).forEach(function(k){
+      var j=+k,d=p.deltas[k];
+      profit[j]+=d;
+      if(d<0&&(!worst||d<worst.d))worst={j:j,d:d,p:p};
+    });
+  });
+  function arg(a){var b=0;for(var x=1;x<a.length;x++)if(a[x]>a[b])b=x;return b}
+  return {profit:profit,raised:raised,worst:worst,champ:arg(G.cash),shark:arg(profit),founder:arg(raised)};
+}
+function vFinal(){
+  var st=stats();
+  var order=G.players.map(function(_,i){return i}).sort(function(a,b){return G.cash[b]-G.cash[a]});
+  var rows=order.map(function(i,k){var d=G.cash[i]-START;return '<div class="row"><span class="nm">'+(k+1)+'. '+pn(i)+'</span><span class="mono" style="text-align:right"><b>'+money(G.cash[i])+'</b><br><small class="'+(d>0?'good':d<0?'bad':'muted')+'">'+signed(d)+'</small></span></div>'}).join('');
+  var aws='';
+  [['drawing','Best Drawing',function(p){return pn(p.drawer)}],['name','Best Name',function(p){return pn(p.namer)}],['pitch','Best Pitch',function(p){return pn(p.pitcher)}]].forEach(function(a){
+    var p=G.products[G.picks[a[0]]];
+    if(p)aws+='<div class="aw"><img class="pimg" src="'+p.img+'" alt=""><div><div class="t">'+a[1]+'</div><div class="w">'+a[2](p)+'</div><div class="s">'+esc(p.name)+'</div></div></div>';
+  });
+  function plain(t,w,s){return '<div class="aw"><div><div class="t">'+t+'</div><div class="w">'+w+'</div><div class="s">'+s+'</div></div></div>'}
+  if(st.profit[st.shark]>0)aws+=plain('Shark of the Year',pn(st.shark),'Made '+money(st.profit[st.shark])+' as an investor');
+  if(st.raised[st.founder]>0)aws+=plain('Top Founder',pn(st.founder),'Raised '+money(st.raised[st.founder])+' in total');
+  if(st.worst)aws+=plain('Bag Holder',pn(st.worst.j),'Lost '+money(-st.worst.d)+' on "'+esc(st.worst.p.name)+'"');
+  return '<div class="card center"><span class="crown">Champion</span><div class="pname">'+pn(st.champ)+'</div><div class="big">'+money(G.cash[st.champ])+'</div></div>'+
+  '<div class="card"><h3>Final standings</h3><div>'+rows+'</div></div>'+
+  '<div class="card"><h3>Awards</h3><div class="stack">'+aws+'</div></div>'+
+  '<button class="btn primary" data-act="toGallery">See the gallery</button>';
+}
+function vGallery(){
+  var cards=G.products.map(function(p){
+    var badge=p.funded?'<span class="badge ok">Raised '+money(p.total)+' · ×'+p.mult+'</span>':'<span class="badge no">Deal collapsed</span>';
+    return '<div class="card" style="padding:10px;gap:8px;box-shadow:3px 3px 0 var(--shadow)"><img class="pimg" src="'+p.img+'" alt="Drawing of '+esc(p.name)+'"><b style="font:900 17px/1.15 var(--display);overflow-wrap:anywhere">'+esc(p.name)+'</b><span class="tag" style="font-size:12px">'+esc(p.market)+'</span><small class="muted" style="overflow-wrap:anywhere">Drawn by '+pn(p.drawer)+'<br>Named by '+pn(p.namer)+'<br>Pitched by '+pn(p.pitcher)+'</small><div>'+badge+'</div></div>';
+  }).join('');
+  return '<div class="card"><h2>The gallery</h2><p class="muted">Every product from tonight. Screenshot your favorites.</p></div><div class="two" style="align-items:start">'+cards+'</div>'+
+  '<div class="dock stack"><button class="btn" data-act="backFinal">Back to results</button><button class="btn primary" data-act="newGame">New game</button></div>';
+}
+
+function render(){
+  clearTimerUI();
+  var root=$('app');
+  if(!G){root.innerHTML=vSetup();return}
+  var s=G.screen,body='';
+  if(s.type==='bid'){var k=s.pid+':'+s.k;if(bidKey!==k){bidKey=k;bidAmt=0}}
+  switch(s.type){
+    case 'pass':body=vPass(s);break;
+    case 'draw':body=vDraw(s);break;
+    case 'name':body=vName(s);break;
+    case 'ask':body=vAsk(s);break;
+    case 'pitch':body=vPitch(s);break;
+    case 'bid':body=vBid(s);break;
+    case 'reveal':body=vReveal(s);break;
+    case 'roundEnd':body=vRoundEnd();break;
+    case 'pick':body=vPick(s);break;
+    case 'final':body=vFinal();break;
+    case 'gallery':body=vGallery();break;
+  }
+  root.innerHTML=header()+body+(showStand?vStand():'');
+  if(s.type==='draw')setupCanvas();
+}
+
+/* ---------- drawing ---------- */
+function drawStroke(ctx,st){
+  ctx.strokeStyle=st.c;ctx.fillStyle=st.c;ctx.lineWidth=st.w;ctx.lineCap='round';ctx.lineJoin='round';
+  if(st.pts.length===1){ctx.beginPath();ctx.arc(st.pts[0][0],st.pts[0][1],st.w/2,0,Math.PI*2);ctx.fill();return}
+  ctx.beginPath();ctx.moveTo(st.pts[0][0],st.pts[0][1]);
+  for(var i=1;i<st.pts.length;i++)ctx.lineTo(st.pts[i][0],st.pts[i][1]);
+  ctx.stroke();
+}
+function updateTools(){
+  document.querySelectorAll('[data-act="color"]').forEach(function(b){b.classList.toggle('on',!tool.erase&&+b.dataset.i===tool.color)});
+  document.querySelectorAll('[data-act="size"]').forEach(function(b){b.classList.toggle('on',+b.dataset.i===tool.size)});
+  var e=$('erb');if(e)e.classList.toggle('on',tool.erase);
+}
+function updateDone(){var b=$('doneBtn');if(b)b.disabled=!strokes.length}
+function setupCanvas(){
+  var cv=$('cv'),ctx=cv.getContext('2d');
+  strokes=[];cur=null;backup=null;tool={color:0,size:1,erase:false};
+  function redraw(){ctx.fillStyle='#fff';ctx.fillRect(0,0,800,800);strokes.forEach(function(st){drawStroke(ctx,st)})}
+  cvRedraw=redraw;redraw();updateTools();updateDone();
+  function pt(e){var r=cv.getBoundingClientRect();return [(e.clientX-r.left)*800/r.width,(e.clientY-r.top)*800/r.height]}
+  cv.addEventListener('pointerdown',function(e){
+    e.preventDefault();
+    try{cv.setPointerCapture(e.pointerId)}catch(x){}
+    cur={c:tool.erase?'#ffffff':PALETTE[tool.color][0],w:tool.erase?SIZES[tool.size][0]*1.8:SIZES[tool.size][0],pts:[pt(e)]};
+    strokes.push(cur);backup=null;
+    drawStroke(ctx,cur);updateDone();
+  });
+  cv.addEventListener('pointermove',function(e){
+    if(!cur)return;
+    e.preventDefault();
+    var evs=e.getCoalescedEvents?e.getCoalescedEvents():[e];
+    if(!evs.length)evs=[e];
+    evs.forEach(function(ev){
+      var a=cur.pts[cur.pts.length-1],b=pt(ev);
+      cur.pts.push(b);
+      ctx.strokeStyle=cur.c;ctx.lineWidth=cur.w;ctx.lineCap='round';ctx.lineJoin='round';
+      ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();
+    });
+  });
+  function end(){cur=null}
+  cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);cv.addEventListener('lostpointercapture',end);
+  cv.addEventListener('contextmenu',function(e){e.preventDefault()});
+}
+function exportImg(){
+  var c=document.createElement('canvas');c.width=c.height=480;
+  var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,480,480);
+  x.drawImage($('cv'),0,0,480,480);
+  return c.toDataURL('image/jpeg',0.82);
+}
+
+/* ---------- timer ---------- */
+function stopTimer(){if(tInt){clearInterval(tInt);tInt=null}}
+function clearTimerUI(){stopTimer()}
+function beep(){
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    var o=AC.createOscillator(),g=AC.createGain();
+    o.connect(g);g.connect(AC.destination);o.type='square';o.frequency.value=660;g.gain.value=0.15;
+    o.start();o.stop(AC.currentTime+0.6);
+  }catch(e){}
+  try{if(navigator.vibrate)navigator.vibrate([250,120,250])}catch(e){}
+}
+function startTimer(){
+  try{AC=AC||new (window.AudioContext||window.webkitAudioContext)()}catch(e){}
+  stopTimer();tLeft=G.timer;
+  var btn=$('tbtn');if(btn)btn.hidden=true;
+  $('tleft').textContent=fmtT(tLeft);
+  tInt=setInterval(function(){
+    tLeft--;
+    var el=$('tleft');
+    if(!el){stopTimer();return}
+    el.textContent=fmtT(Math.max(0,tLeft));
+    if(tLeft<=0){stopTimer();$('timer').classList.add('up');el.textContent='Time!';beep()}
+  },1000);
+}
+
+/* ---------- events ---------- */
+document.addEventListener('input',function(e){
+  var t=e.target;
+  if(t.id==='askr'){$('askv').textContent=money(+t.value)}
+  else if(t.id==='pname'||t.id==='pmarket'){$('nameDone').disabled=!($('pname').value.trim()&&$('pmarket').value.trim())}
+  else if(t.classList&&t.classList.contains('inp')&&t.dataset.i!==undefined&&!G){S.names[+t.dataset.i]=t.value}
+});
+function bidCtx(){var s=G.screen,p=G.products[s.pid],who=investors(p)[s.k];return {s:s,p:p,who:who,max:Math.min(G.cash[who],p.ask),step:bstep(p)}}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-act]');
+  if(!b||b.disabled)return;
+  var a=b.dataset.act,i=b.dataset.i!==undefined?+b.dataset.i:null,d=+b.dataset.d,v=b.dataset.v;
+  var s=G?G.screen:null,N=G?G.players.length:0,p,c;
+  switch(a){
+    case 'addP':if(S.names.length<MAX_P){S.names.push('');render()}break;
+    case 'delP':S.names.splice(i,1);render();break;
+    case 'rounds':S.rounds=clamp(S.rounds+d,1,10);render();break;
+    case 'timer':S.timer=+v;render();break;
+    case 'start':newGame();break;
+    case 'resume':G=SAVED;SAVED=null;render();window.scrollTo(0,0);break;
+    case 'discard':clearSave();SAVED=null;render();break;
+    case 'passGo':go(s.next);break;
+    case 'color':tool.color=i;tool.erase=false;updateTools();break;
+    case 'size':tool.size=i;updateTools();break;
+    case 'eraser':tool.erase=!tool.erase;updateTools();break;
+    case 'undo':
+      if(strokes.length)strokes.pop();else if(backup){strokes=backup;backup=null}
+      cvRedraw();updateDone();break;
+    case 'clear':
+      if(strokes.length){backup=strokes;strokes=[]}
+      cvRedraw();updateDone();break;
+    case 'drawDone':
+      p=G.products[s.pid];p.img=exportImg();drawNext(p.round,p.drawer+1);break;
+    case 'nameDone':
+      p=G.products[s.pid];p.name=$('pname').value.trim();p.market=$('pmarket').value.trim();
+      nameNext(p.round,p.id-p.round*N+1);break;
+    case 'askStep':
+      c=$('askr');c.value=clamp(+c.value+d*ASK_STEP,ASK_MIN,ASK_MAX);$('askv').textContent=money(+c.value);break;
+    case 'askDone':
+      G.products[s.pid].ask=+$('askr').value;go({type:'pitch',pid:s.pid});break;
+    case 'tStart':startTimer();break;
+    case 'pitchDone':stopTimer();bidNext(s.pid,0);break;
+    case 'bidStep':c=bidCtx();bidAmt=clamp(bidAmt+d*c.step,0,c.max);$('bidv').textContent=money(bidAmt);break;
+    case 'bidSet':
+      c=bidCtx();
+      bidAmt=v==='0'?0:v==='max'?c.max:clamp(Math.round(c.max/2/c.step)*c.step,0,c.max);
+      $('bidv').textContent=money(bidAmt);break;
+    case 'tip':
+      c=bidCtx();c.p.tips[c.who]=c.p.mult>1?'ABOVE':'BELOW';G.tipUsed[G.round+':'+c.who]=c.p.id;save();render();break;
+    case 'bidLock':
+      c=bidCtx();c.p.bids[c.who]=Math.min(bidAmt,c.max);bidNext(s.pid,s.k+1);break;
+    case 'revNext':
+      p=G.products[s.pid];
+      if(s.stage===0){s.stage=1;save();render()}
+      else if(s.stage===1&&p.funded){s.stage=2;save();render()}
+      else pitchNext(p.round,p.id-p.round*N+1);
+      break;
+    case 'roundNext':
+      if(G.round<G.rounds-1){G.round++;startRound()}else go({type:'pick',i:0});break;
+    case 'pickSel':G.picks[PICKS[s.i].k]=i;save();render();break;
+    case 'pickLock':
+      if(s.i<PICKS.length-1)go({type:'pick',i:s.i+1});else go({type:'final'});break;
+    case 'toGallery':go({type:'gallery'});break;
+    case 'backFinal':go({type:'final'});break;
+    case 'newGame':clearSave();G=null;SAVED=null;showStand=false;render();window.scrollTo(0,0);break;
+    case 'stand':showStand=!showStand;confirmQuit=false;render();break;
+    case 'quit':
+      if(!confirmQuit){confirmQuit=true;render()}
+      else{clearSave();G=null;SAVED=null;showStand=false;confirmQuit=false;render();window.scrollTo(0,0)}
+      break;
+  }
+});
+render();
+</script>
